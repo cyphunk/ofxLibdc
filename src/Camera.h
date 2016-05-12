@@ -10,11 +10,30 @@
 #define OFXLIBDC_BUFFER_SIZE 4
 
 namespace ofxLibdc {
+    
+    struct Device {
+        uint16_t    unit;
+        uint64_t    guidInt;
+        
+        string      guid;
+        
+        /*
+        int id;
+        string deviceName;
+        string hardwareName;
+        string serialID;
+        vector<ofVideoFormat> formats;
+        bool bAvailable;
+         */
+    };
 
 class Camera {
 public:
 	Camera(bool isStereoCamera = false);
+    
+    // getters about general camera situation
 	static int getCameraCount();
+    static vector<Device> listDevices();
 	
 	// pre-setup settings
 	void setSize(unsigned int width, unsigned int height);

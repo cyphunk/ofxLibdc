@@ -80,6 +80,28 @@ namespace ofxLibdc {
 		return cameraCount;
 	}
 	
+    
+    vector<Device> Camera::listDevices()  {
+        static vector<Device> deviceList;
+        deviceList.clear();
+        stringstream ss;
+        
+        dc1394camera_list_t* list;
+        dc1394_camera_enumerate(libdcContext, &list);
+        for(int i = 0; i < list->num; i++) {
+            deviceList.push_back( Device() );
+            deviceList.back().unit = list->ids[i].unit;
+            deviceList.back().guidInt = list->ids[i].guid;
+            
+            ss << hex << deviceList.back().guidInt;
+            deviceList.back().guid = ss.str();
+            ss.clear();
+        }
+        
+        dc1394_camera_free_list(list);
+        return deviceList;
+    }
+    
 	// todo: add an error message if you set an invalid (too big) size
 	void Camera::setSize(unsigned int width, unsigned int height) {
 		bool changed = width != this->width || height != this->height; 

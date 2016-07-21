@@ -100,6 +100,21 @@ win_cb:
 vs:
 
 linuxarmv6l:	
+
+	# linux only, any library that should be included in the project using
+	# pkg-config
+	ADDON_PKG_CONFIG_LIBRARIES = libdc1394-2
+	
+	# when parsing the file system looking for sources exclude this for all or
+	# a specific platform
+	ADDON_SOURCES_EXCLUDE = libs/ 
+	ADDON_SOURCES_EXCLUDE = PCRE
+	
+	
+	# when parsing the file system looking for include paths exclude this for all or
+	# a specific platform
+    ADDON_INCLUDES_EXCLUDE = libs/%
+    
 	
 linuxarmv7l:
 

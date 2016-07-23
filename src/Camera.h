@@ -50,6 +50,7 @@ public:
     
 	// post-setup settings	
     string getGuid();
+	void printFeatures();
     
 	// normalized values
 	void setBrightness(float brightness);

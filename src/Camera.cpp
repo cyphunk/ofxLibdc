@@ -399,7 +399,7 @@ namespace ofxLibdc {
         err = dc1394_camera_enumerate (libdcContext, &list);
         
         if (list->num == 0) {
-            ofLogError("No cameras found");
+            ofLogError() << "No cameras found";
             return;
         }
         

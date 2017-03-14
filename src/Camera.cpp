@@ -346,14 +346,14 @@ namespace ofxLibdc {
                 
                 dc1394framerates_t frameRates;
                 dc1394_video_get_supported_framerates(camera, videoMode, &frameRates);
-                for(int i = 0; i < frameRates.num; i++) {
+                for(int i = 0; i < MIN(frameRates.num, DC1394_FRAMERATE_NUM); i++) {
                     ofLogVerbose() << "Available framerate: " << makeString(frameRates.framerates[i]);
                 }
                 if(frameRate == 0 && frameRates.num > 0) {
                     framerateActual = frameRates.framerates[frameRates.num - 1];
                 } else {
                     float bestDistance;
-                    for(int i = 0; i < frameRates.num; i++) {
+                    for(int i = 0; i < MIN(frameRates.num, DC1394_FRAMERATE_NUM); i++) {
                         float curDistance = abs(frameRate - makeFloat(frameRates.framerates[i]));
                         if(i == 0 || curDistance < bestDistance) {
                             bestDistance = curDistance;

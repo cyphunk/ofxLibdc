@@ -95,6 +95,7 @@ namespace ofxLibdc {
             
             ss << hex << deviceList.back().guidInt;
             deviceList.back().guid = ss.str();
+            ss.str("");
             ss.clear();
         }
         

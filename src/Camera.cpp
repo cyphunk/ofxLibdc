@@ -229,7 +229,7 @@ namespace ofxLibdc {
 		
 		return true;
 	}
-	
+
 	bool Camera::applySettings() {
 		if(camera)
 			dc1394_capture_stop(camera);
@@ -272,8 +272,23 @@ namespace ofxLibdc {
                 ofLogVerbose() << "Maximum size for current Format7 mode is " << maxWidth << "x" << maxHeight;
                 quantizePosition();
                 quantizeSize();
+
                 uint32_t packetSize = DC1394_USE_MAX_AVAIL;
                 if(frameRate > 0) {
+
+                    dc1394_feature_set_mode(camera, DC1394_FEATURE_FRAME_RATE, DC1394_FEATURE_MODE_MANUAL);
+                    dc1394_feature_set_power(camera, DC1394_FEATURE_FRAME_RATE, DC1394_OFF);
+
+                          /*
+                    float min, max;
+                    getFeatureAbsRange(DC1394_FEATURE_FRAME_RATE, &min, &max);
+                    ofLog() << "min: " << min << " max: " << max;
+                    //dc1394_feature_get_boundaries(camera, DC1394_FEATURE_FRAME_RATE)
+                    */
+
+                    //dc1394_set_register(camera, 0x600, 0x00);
+
+
                     // http://damien.douxchamps.net/ieee1394/libdc1394/v2.x/faq/#How_can_I_work_out_the_packet_size_for_a_wanted_frame_rate
                     float busPeriod = use1394b ? 6.25e-5 : 125e-5; // e-5 is microseconds
                     int numPackets = (int) (1.0 / (busPeriod * frameRate) + 0.5);
@@ -281,6 +296,9 @@ namespace ofxLibdc {
                     int depth = getSourceDepth();
                     packetSize = (width * height * depth + denominator - 1) / denominator;
                     ofLogWarning() << "The camera may not run at exactly " << frameRate << " fps";
+                }else{
+                    dc1394_feature_set_mode(camera, DC1394_FEATURE_FRAME_RATE, DC1394_FEATURE_MODE_AUTO);
+                    dc1394_feature_set_power(camera, DC1394_FEATURE_FRAME_RATE, DC1394_ON);
                 }
                 dc1394_format7_set_packet_size(camera, videoMode, packetSize);
                 unsigned int curWidth, curHeight;
@@ -309,14 +327,14 @@ namespace ofxLibdc {
                 dc1394_video_get_supported_modes(camera, &video_modes);
                 dc1394color_coding_t targetCoding = getLibdcType(imageType);
                 if(useBayer){
-                    targetCoding = DC1394_COLOR_CODING_MONO8;
+                    targetCoding = DC1394_COLOR_CODING_RAW8;
                 }
                 float bestDistance = 0;
                 dc1394video_mode_t bestMode;
                 bool found = false;
                 for(int i = 0; i < video_modes.num; i++) {
                     dc1394video_mode_t curMode = video_modes.modes[i];
-                    if (!dc1394_is_video_mode_scalable(video_modes.modes[i])) {
+                    //if (!dc1394_is_video_mode_scalable(video_modes.modes[i])) {
                         unsigned int curWidth, curHeight;
                         dc1394_get_image_size_from_video_mode(camera, curMode, &curWidth, &curHeight);
                         dc1394color_coding_t curCoding;
@@ -330,9 +348,11 @@ namespace ofxLibdc {
                             }
                             found = true;
                         }
+                    /*
                     } else {
                         ofLogVerbose()<<"Non-scalable mode "<<curMode<<endl;
                     }
+                    */
                 }
                 
                 if(!found) {
@@ -349,14 +369,14 @@ namespace ofxLibdc {
                 
                 dc1394framerates_t frameRates;
                 dc1394_video_get_supported_framerates(camera, videoMode, &frameRates);
-                for(int i = 0; i < frameRates.num; i++) {
+                for(int i = 0; i < MIN(frameRates.num, DC1394_FRAMERATE_NUM); i++) {
                     ofLogVerbose() << "Available framerate: " << makeString(frameRates.framerates[i]);
                 }
-                if(frameRate == 0) {
+                if(frameRate == 0 && frameRates.num > 0) {
                     framerateActual = frameRates.framerates[frameRates.num - 1];
                 } else {
                     float bestDistance;
-                    for(int i = 0; i < frameRates.num; i++) {
+                    for(int i = 0; i < MIN(frameRates.num, DC1394_FRAMERATE_NUM); i++) {
                         float curDistance = abs(frameRate - makeFloat(frameRates.framerates[i]));
                         if(i == 0 || curDistance < bestDistance) {
                             bestDistance = curDistance;
@@ -377,8 +397,14 @@ namespace ofxLibdc {
 		dc1394_video_set_mode(camera, videoMode);
 		
 		dc1394_capture_setup(camera, OFXLIBDC_BUFFER_SIZE, DC1394_CAPTURE_FLAGS_DEFAULT);
-		
+
 		return true;
+	}
+
+	void Camera::printFeatures(){
+		dc1394featureset_t features;
+		dc1394_feature_get_all(camera,&features);
+		dc1394_feature_print_all(&features, stdout);
 	}
     
     void Camera::resetBus( int which ){
@@ -396,7 +422,7 @@ namespace ofxLibdc {
         err = dc1394_camera_enumerate (libdcContext, &list);
         
         if (list->num == 0) {
-            ofLogError("No cameras found");
+            ofLogError() << "No cameras found";
             return;
         }
         
@@ -730,7 +756,7 @@ namespace ofxLibdc {
 				ready = true;
 				return true;
             } else {
-                ofLogVerbose()<<"[ofxLibdc] Frame is null. Libdc error code:"<<err;
+                //ofLogVerbose("ofxLibdc")<<"Frame is null. Libdc error code:"<<err;
 				return false;
 			}
         } else {

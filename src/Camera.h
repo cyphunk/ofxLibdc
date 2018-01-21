@@ -1,7 +1,7 @@
 #pragma once
 
 #include "ofMain.h"
-#include "dc1394.h"
+#include <dc1394/dc1394.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -69,6 +69,7 @@ public:
     
 	// post-setup settings	
     string getGuid();
+	void printFeatures();
     
 	// normalized values
 	void setBrightness(float brightness);

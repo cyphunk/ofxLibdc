@@ -38,7 +38,7 @@ public:
     const ofPixels& getPixels() const override;
     
     bool isInitialized() const override {return true;}
-    bool setPixelFormat(ofPixelFormat pixelFormat) override {}
+    bool setPixelFormat(ofPixelFormat pixelFormat) override {return true;}
     ofPixelFormat getPixelFormat() const override {return OF_PIXELS_UNKNOWN;}
     
 protected:

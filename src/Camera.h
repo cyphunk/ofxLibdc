@@ -1,7 +1,11 @@
 #pragma once
 
 #include "ofMain.h"
+#ifdef TARGET_OSX
 #include "dc1394.h"
+#else
+#include "dc1394/dc1394.h"
+#endif
 #include <stdlib.h>
 #include <string.h>
 
